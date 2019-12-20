@@ -81,7 +81,7 @@ def create(customer,
 
 def create_usage_record(subscription_item,
                         quantity=1,
-                        timestamp=timezone.now().timestamp(),
+                        timestamp=int(timezone.now().timestamp()),
                         action='increment'):
 
     resp = stripe.SubscriptionItem.create_usage_record(
@@ -226,15 +226,17 @@ def sync_subscription_from_stripe_data(customer, subscription):
 
     items_to_keep = []
 
-    if 'items' in subscription and len(subscription['items']['data']) > 1:
+    if 'items' in subscription and len(subscription['items']['data']) > 0:
         for item in subscription['items']['data']:
             defaults = dict(
                 created=utils.convert_tstamp(item['created']),
                 metadata=item['metadata'],
                 plan=models.Plan.objects.get(stripe_id=item['plan']['id']),
-                quantity=item['quantity'],
                 subscription=sub
             )
+
+            if item['plan']['usage_type'] == 'licensed':
+                defaults.update({'quantity': item['quantity']})
 
             sub_item, created = models.SubscriptionItem.objects.get_or_create(
                 stripe_id=item['id'],

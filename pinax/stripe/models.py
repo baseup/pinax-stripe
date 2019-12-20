@@ -437,7 +437,7 @@ class SubscriptionItem(StripeObject):
     created = models.DateTimeField(null=True, blank=True)
     metadata = JSONField(null=True, blank=True)
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
+    quantity = models.IntegerField(null=True, blank=True)
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
 
     @property
